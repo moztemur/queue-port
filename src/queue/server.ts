@@ -25,6 +25,11 @@ const createServer = () => {
   
     const action = match[1];
     const queueName = decodeURIComponent(match[2]);
+
+    if (queueName.length === 0) {
+      res.writeHead(400).end('Missing or invalid queue name');
+      return;
+    }
   
     if (method === 'POST' && action === 'enqueue') {
       const { items } = await parseBody(req);
@@ -38,12 +43,17 @@ const createServer = () => {
   
     else if (method === 'POST' && action === 'dequeue') {
       const { count, timeout } = await parseBody(req);
-      if (typeof count !== 'number') {
+      if (count && typeof count !== 'number') {
         res.writeHead(400).end('Missing or invalid count');
         return;
       }
-      // const result = await dequeue(queueName, count, timeout ?? 0);
-      const result = await getQueue(queueName).dequeue(count, timeout ?? 0);
+
+      if (timeout && typeof timeout !== 'number') {
+        res.writeHead(400).end('Missing or invalid timeout');
+        return;
+      }
+
+      const result = await getQueue(queueName).dequeue(count, timeout);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(result));
     }

@@ -106,7 +106,7 @@ function createQueueActor() {
   return {
     enqueue: (items: QueueItem[]) =>
       new Promise<void>((resolve) => send({ type: 'enqueue', items, resolve })),
-    dequeue: (count: number, timeout: number) =>
+    dequeue: (count: number = 1, timeout: number = -1) =>
       new Promise<QueueItem[]>((resolve) => send({ type: 'dequeue', count, timeout, resolve })),
     queueSize: () => queue.length, // ✅ new method
     subscribe: (cb: QueueSubscriber) => subscribers.push(cb),
