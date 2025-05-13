@@ -17,7 +17,8 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build:dashboard": "cp -r src/dashboard/public dist/dashboard/public",
+    "build": "tsc && npm run build:dashboard",
     "start": "ts-node src/run.ts",
     "start:example": "ts-node example/server.ts",
     "lint": "eslint 'src/**/*.ts'",

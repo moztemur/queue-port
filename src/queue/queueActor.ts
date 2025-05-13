@@ -111,7 +111,6 @@ function createQueueActor() {
     queueSize: () => queue.length, // ✅ new method
     subscribe: (cb: QueueSubscriber) => subscribers.push(cb),
     getState: () => {
-      console.log('getState', queue, requesters);
       return {
       queue: [...queue],
       requesters: requesters.map((r) => ({ count: r.count, infinite: r.infinite })),
@@ -129,7 +128,6 @@ export function getQueue(queueName: string) {
 }
 
 export function getAllQueueStates() {
-  console.log('getAllQueueStates', queueRegistry);
   return Object.entries(queueRegistry).map(([name, actor]) => ({
     name,
     ...actor.getState(),

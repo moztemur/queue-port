@@ -3,6 +3,7 @@
 import express from 'express';
 import * as path from 'path';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import * as queuePort from '../dist'
 
 const app = express();
 
@@ -18,6 +19,14 @@ app.use(
   })
 );
 
-app.listen(3011, () => {
-  console.log('Server running at http://localhost:3011');
-});
+queuePort.start({
+  port: 8765,
+  enableDashboardServer: true,
+  dashboardServerPort: 8760
+}).then(() => {
+  app.listen(3011, () => {
+    console.log('Server running at http://localhost:3011');
+  });
+})
+
+
