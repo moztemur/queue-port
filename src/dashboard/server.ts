@@ -1,11 +1,12 @@
-// server.ts
-
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { WebSocketServer } from 'ws';
-import { getAllQueueStates } from '../queueActor';
+import { getAllQueueStates } from '../queue/queueActor';
 import { URL } from 'url';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('dashboard-server');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
@@ -48,7 +49,7 @@ const createServer = () => {
 // Broadcast queue state to all connected clients
 function broadcastState(wss: WebSocketServer) {
   const state = getAllQueueStates();
-  console.log('Broadcasting state:', state);
+  log('Broadcasting state:', state);
   const payload = JSON.stringify({ type: 'state', queues: state });
   wss.clients.forEach((client: any) => {
     if (client.readyState === client.OPEN) {
@@ -57,7 +58,7 @@ function broadcastState(wss: WebSocketServer) {
   });
 }
 
-const start = (port: number) => {
+const start = (port: number): Promise<void> => {
   const server = createServer();
 
   // --- WebSocket Server for Live Dashboard ---
@@ -66,10 +67,13 @@ const start = (port: number) => {
   // Periodic update for all WebSocket clients (e.g., every 1s)
   setInterval(() => { broadcastState(wss) }, 1000);
 
-  // Start HTTP + WebSocket server
+  return new Promise((resolve) => {
+      // Start HTTP + WebSocket server
   server.listen(port, () => {
-    console.log(`🚀 Dashboard available at http://localhost:${port}`);
+    log(`🚀 Dashboard available at http://localhost:${port}`);
+    resolve()
   });
+  })
 }
 
 export { start };

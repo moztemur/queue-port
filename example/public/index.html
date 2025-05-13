@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Queue API Demo</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    input, button { margin: 0.25rem 0; display: block; }
+    .response { margin-top: 1rem; font-family: monospace; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Queue API Demo</h1>
+
+  <label>
+    Queue Name:
+    <input type="text" id="queueName" value="my-queue">
+  </label>
+
+  <h2>Enqueue</h2>
+  <label>
+    Items (comma-separated):
+    <input type="text" id="enqueueItems" value="foo,bar,baz">
+  </label>
+  <button onclick="enqueue()">Enqueue</button>
+
+  <h2>Dequeue</h2>
+  <label>
+    Count:
+    <input type="number" id="dequeueCount" value="2">
+  </label>
+  <label>
+    Timeout (ms; 0 = immediate, -1 = infinite):
+    <input type="number" id="dequeueTimeout" value="0">
+  </label>
+  <button onclick="dequeue()">Dequeue</button>
+
+  <div class="response" id="responseBox"></div>
+
+  <script>
+    async function enqueue() {
+      const queue = document.getElementById("queueName").value;
+      const rawItems = document.getElementById("enqueueItems").value;
+      const items = rawItems.split(',').map(s => s.trim()).filter(Boolean);
+
+      const res = await fetch('/enqueue/' + queue, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+
+      const text = await res.text();
+      document.getElementById('responseBox').textContent = 'Enqueue response:\n' + text;
+    }
+
+    async function dequeue() {
+      const queue = document.getElementById("queueName").value;
+      const count = parseInt(document.getElementById("dequeueCount").value, 10);
+      const timeout = parseInt(document.getElementById("dequeueTimeout").value, 10);
+
+      const res = await fetch('/dequeue/' + queue, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count, timeout })
+      });
+
+      const data = await res.json();
+      document.getElementById('responseBox').textContent = 'Dequeue result:\n' + JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>

@@ -1,3 +1,3 @@
-import { start } from './run';
+import { start } from './server';
 
 export { start }

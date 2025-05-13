@@ -1,17 +1,9 @@
-import * as server from './server';
-import * as dashboardServer from './dashboard/server';
+import { start } from './server';
 
-
-const start = ({
-  port = 8765,
-  enableDashboardServer = false,
-  dashboardServerPort = 8760,
-}) => {
-  server.start(port);
-
-  if (enableDashboardServer) {
-    dashboardServer.start(dashboardServerPort);
-  }
-}
-
-export { start }
+start({
+  port: 8765,
+  enableDashboardServer: true,
+  dashboardServerPort: 8760
+}).then(() => {
+  console.log('queue (and dashboard) server started')
+})
