@@ -1,0 +1,66 @@
+name: Build, Version Bump, and Publish to NPM
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-version-publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # Allow GitHub Actions to push changes (like updated package.json)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Bump Version
+        run: |
+          npm version patch --no-git-tag-version
+
+      - name: Get Version
+        id: get_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Commit bumped version and create git tag
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add package.json package-lock.json
+          git commit -m "ci: bump version to v${{ steps.get_version.outputs.version }} [skip ci]"
+          git tag "v${{ steps.get_version.outputs.version }}"
+          git push origin master --tags
+
+      - name: Build Package
+        run: npm run build
+      
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: Release v${{ steps.get_version.outputs.version }}
+          generate_release_notes: true

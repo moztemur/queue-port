@@ -1,0 +1,41 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Queue Monitor</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .queue { margin-bottom: 2rem; border: 1px solid #ccc; padding: 1rem; border-radius: 8px; }
+    pre { background: #f0f0f0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Queue Monitor</h1>
+  <div id="queues"></div>
+
+  <script>
+    const ws = new WebSocket(`ws://${location.host}`);
+
+    ws.onmessage = (event) => {
+      const { type, queues } = JSON.parse(event.data);
+      if (type !== 'state') return;
+
+      const container = document.getElementById('queues');
+      container.innerHTML = '';
+
+      queues.forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'queue';
+        div.innerHTML = `
+          <h2>Queue: ${q.name}</h2>
+          <p><strong>Items:</strong> ${JSON.stringify(q.queue)}</p>
+          <p><strong>Waiting dequeue requests:</strong></p>
+          <pre>${JSON.stringify(q.requesters, null, 2)}</pre>
+        `;
+        container.appendChild(div);
+      });
+    };
+  </script>
+</body>
+</html>
