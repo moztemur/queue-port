@@ -5,7 +5,18 @@
   "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "Mahmut Oztemur",
-  "description": "A package to provide http interface for basic queue based on actor model.",
+  "description": "A package to provide http interface for a basic queue based on actor model.",
+  "homepage": "https://github.com/moztemur/queue-port",
+  "keywords": [
+    "queue",
+    "actor",
+    "http",
+    "interface"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/moztemur/queue-port.git"
+  },
   "files": [
     "dist"
   ],
